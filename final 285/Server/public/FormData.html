@@ -1,0 +1,196 @@
+<!doctype html>
+<html>
+    <head>
+        <meta name='viewport' content='width=device-width, initial-scale=1.0'>            
+        <title>Factions of Warhammer</title>
+        <link rel='stylesheet' href='style.css'>
+    </head>
+    <body>
+        <header id="Banner">
+            <h1>Leader Survey</h1>
+        <nav>
+            <ul>
+                <li><a href="Informationpage.html">info</a></li>
+                <li><a href="update.html">Edit a Submission</a></li>
+                <li><a href='index.html'>new response.</a></li>
+              </ul>
+        </nav>
+    </header>
+
+
+        <section class="container-fluid" id="Wrapper">
+      
+        <div class="formArea">
+        <div  class='row'>
+            <div class='col-2'>
+                <label>Factions</label>
+            </div>
+            <div class='col-10'>
+                <select id='factions'>
+                    <option value=''></option>
+                    <option value='Imperium'>Imperium</option>
+                    <option value='Chaos'>Chaos</option>
+                    <option value='Orks'>Orks</option>
+                    <option value='Necron'>Necron</option>
+                    <option value='Tau'>Tau</option>
+                    <option value='Eldar'>Eldar</option>
+                    <option value='Tryandis'>Tryandis</option>
+                </select>
+            </div>
+        </div>
+
+        
+        <div  class='row'>
+            <div class='col-2'>
+                <label>Alignments</label>
+            </div>
+            <div class='col-10'>
+                <select id='alignment'>
+                    <option value=''></option>
+                    <option value='chaotic good'>chaotic good</option>
+                    <option value='chaotic neutral'>chaotic neutral</option>
+                    <option value='chaotic evil'>chaotic evil</option>
+                    <option value='neutral good'>neutral good</option>
+                    <option value='lawful good'>lawful good</option>
+                    <option value='lawful evil'>lawful evil</option>
+                </select>
+            </div>
+        </div>
+
+
+        <div class='row'>
+            <div class='col-2'>
+                <label>Faction Leader</label>
+            </div>
+            <div class='col-10'>
+                <input id='Leader' type='text' />
+            </div>
+        </div>
+        
+
+        <div  class='row'>
+            <div class='col-2'>
+                <label>Limit Number of Rows?</label>
+            </div>
+            <div class='col-10'>
+                <select id='limit'>
+                    <option value=''></option>
+                    <option value='5'>Limit to 5</option>
+                    <option value='4'>Limit to 4</option>
+                    <option value='3'>Limit to 3</option>
+                    <option value='2'>Limit to 2</option>
+                    <option value='1'>Limit to 1</option>
+                </select>
+            </div>
+        </div>
+
+        <div  class='row'>
+            <div class='col-2'>
+                <label>Order by Name</label>
+            </div>
+            <div class='col-10'>
+                <select id='sort'>
+                    <option value=''></option>
+                    <option value='ASC'>Ascending</option>
+                    <option value='DESC'>Descending</option>
+                </select>
+            </div>
+        </div>
+
+        <div class='row'>
+            <div class='col-12'>
+                <button id='search'>Search for Factions</button>
+            </div>
+        </div>
+</div>
+       
+
+        <div id='classes' class='overflow'>
+            Factions go here.
+        </div>
+    </section>
+
+
+    <footer class="container-fluid" id="Footer">
+        <div id="copyright">
+          <p>&copy; Copyright 2022 Harry </p>
+        </div>
+      </footer>
+
+
+
+
+
+        <script>
+            const isEmpty = (obj) => Object.keys(obj).length === 0;
+
+            document.getElementById('search').addEventListener('click', (event) => {
+                const getParameters = {};
+
+                if (document.getElementById('Leader').value.length !== 0) {
+                    getParameters.Leader = document.getElementById('Leader').value;
+                }
+                if (document.getElementById('factions').value.length !== 0) {
+                    getParameters.Factions = document.getElementById('factions').value;
+                }
+                if (document.getElementById('limit').value.length !== 0) {
+                    getParameters.limit = document.getElementById('limit').value;
+                }
+                if (document.getElementById('sort').value.length !== 0) {
+                    getParameters.sort = document.getElementById('sort').value;
+                }
+                if (document.getElementById('alignment').value.length !== 0) {
+                    getParameters.alignment = document.getElementById('alignment').value;
+                }
+
+                //Settings for FETCH API request
+                let fetchSettings = {
+                    method: 'GET',
+                };
+
+                //Send FETCH API request
+                fetch("/leader/" + (!isEmpty(getParameters) ? '?' + new URLSearchParams(getParameters) : ''), fetchSettings) 
+                    .then((response) => {
+                        return new Promise((resolve) => response.json()
+                            .then((json) => resolve({
+                                status: response.status,
+                                json,
+                            })
+                        ));
+                    })
+                    //Logic to display errors on form 
+                    .then(({status, json}) => {
+                        if (status === 200) {
+                            let displayTable = '<table>' +
+                                            '<thead>' +
+                                                '<tr>' +
+                                                    '<th width="25%">id</th>' +
+                                                    '<th width="25%">Leader</th>' + 
+                                                    '<th width="25%">Alignment</th>' + 
+                                                    '<th width="25%">Faction</th>' + 
+
+                                                '</tr>' +
+                                            '</thead>' +
+                                            '<tbody>';
+                            if (typeof json.data !== 'undefined') {
+                                for (row of json.data) {
+                                    displayTable += '<tr>' +
+                                        '<td>' + row.id+ '</td>' +
+                                        '<td>' + row.leader + '</td>' +
+                                        '<td>' + row.alignment+ '</td>' +
+                                        '<td>' + row.name + '</td>' +
+                                    '</tr>';
+                                }
+                            }
+                            displayTable += '</tbody></table>';
+                            document.getElementById('classes').innerHTML = displayTable;  
+                        } 
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                return;
+            });               
+        </script>
+    </body>
+</html>

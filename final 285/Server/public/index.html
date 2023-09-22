@@ -1,0 +1,204 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Faction Leaders insert</title>
+<link rel='stylesheet' href='style.css'>
+</head>
+
+<body>
+    <header id="Banner">
+        <h1>Leader Survey</h1>
+    <nav>
+        <ul>
+            <li><a href="Informationpage.html">info</a></li>
+            <li><a href="FormData.html">Form Data</a></li>
+            <li><a href="update.html">Edit a Submission</a></li>
+          </ul>
+    </nav>
+</header>
+
+    <section class="container-fluid" id="Wrapper">
+    <div class="row" class="FormData">
+    <div class="formArea">
+        <div id='invalidate-form' class='alert-error'></div>
+        <div class='row'>
+            <div class='col-2'>
+                <label>Leader</label>
+            </div>
+            <div class='col-10'>
+                <input id='leader' type='text' />
+            </div>
+        </div>
+
+        <div class='row'>
+            <div id='leader-error' class='col-12 error-message'>&nbsp;</div>
+        </div>
+
+        <div class='row'>
+            <div class='col-2'>
+                <label>sub faction</label>
+            </div>
+            <div class='col-10'>
+                <input id='sub_faction' type='text' />
+            </div>
+        </div>
+
+        <div class='row'>
+            <div id='sub_faction-error' class='col-12 error-message'>&nbsp;</div>
+        </div>
+
+        <div class='row'>
+            <div class='col-2'>
+                <label>Role</label>
+            </div>
+            <div class='col-10'>
+                <input id='role' type='text' />
+            </div>
+        </div>
+
+        <div class='row'>
+            <div id='role-error' class='col-12 error-message'>&nbsp;</div>
+        </div>
+
+        <div class='row'>
+            <div class='col-2'>
+                <label>What faction are you?</label>
+            </div>
+            <div class='col-10'>
+                <select id='faction_id'>
+                    <option value=""></option>
+                </select>
+            </div>
+        </div>
+
+        <div class='row'>
+            <div id='factio_id-error' class='col-12 error-message'>&nbsp;</div>
+        </div>
+
+        <div class='row'>
+            <div class='col-12'>
+                <button id='search'>Submit</button>
+            </div>
+        </div>
+        <div id='success-form'>
+            <hr>
+        </div>
+        <div id="successTable">
+        </div>
+        </dvi>
+    </section>
+
+        <footer class="container-fluid" id="Footer">
+            <div id="copyright">
+              <p>&copy; Copyright 2022 Harry </p>
+            </div>
+          </footer>
+
+
+
+          
+        <script>
+            const isEmpty = (obj) => Object.keys(obj).length === 0;
+
+            fetch("/factions/",
+                { method: 'GET' })
+                .then((response) => {
+                    return new Promise((resolve) => response.json()
+                        .then((json) => resolve({
+                            status: response.status,
+                            json,
+                        })
+                        ));
+                })
+                .then(({ status, json }) => {
+                    if (200 === status) {
+                        const FactionDropDown = document.getElementById('faction_id');
+                        for (Factions of json.data) {
+                            let option = document.createElement("option");
+                            option.value = Factions.id;
+                            option.text = Factions.name + ' alignment: ' + Factions.alignment;
+                            FactionDropDown.add(option);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+
+
+
+
+            document.getElementById('search').addEventListener('click', (event) => {
+                const formData = new FormData();
+
+
+                if (document.getElementById('leader').value.length !== 0) {
+                    formData.append('leader', document.getElementById('leader').value);
+                }
+                if (document.getElementById('sub_faction').value.length !== 0) {
+                    formData.append('sub_faction', document.getElementById('sub_faction').value);
+                }
+                if (document.getElementById('role').value.length !== 0) {
+                    formData.append('role', document.getElementById('role').value);
+                }
+                if (document.getElementById('faction_id').value.length !== 0) {
+                    formData.append('faction_id', document.getElementById('faction_id').value);
+                }
+
+                //Settings for FETCH API request
+                let fetchSettings = {
+                    method: 'POST',
+                    body: formData
+                };
+
+         //Hide banner at start of script
+         const errorBanner = document.getElementById('invalidate-form');
+        const successbanner = document.getElementById('success-form');
+        successbanner.hidden = true;
+        errorBanner.hidden = true;
+
+
+
+                //Send FETCH API request
+                fetch("/leader/", fetchSettings)
+                    .then((response) => {
+                        return new Promise((resolve) => response.json()
+                            .then((json) => resolve({
+                                status: response.status,
+                                json,
+                            })
+                            ));
+                    })//Logic to display errors on form 
+                .then(({ status, json }) => {
+                    const errorMessages = document.getElementsByClassName('error-message');
+                    errorBanner.hidden = true;
+                    for (htmlElement of errorMessages) {
+                        htmlElement.innerHTML = '&nbsp;';
+                    }
+                    if (status === 400) {
+                        errorBanner.innerText = 'Form has errors. Please correct them and resubmit.';
+                        errorBanner.hidden = false;
+                        console.log(json.errors);
+                        for (error of json.errors) {
+                            const errorId = error.param + '-error';
+                            console.log(errorId);
+                            document.getElementById(errorId).innerHTML = error.msg
+                        }
+                   }  else if (errorBanner.hidden == true) {
+                        console.log('success 200');
+                        successbanner.innerText = 'form is good.';
+                        successbanner.hidden = false;
+                        console.log(json);
+                }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+                return;
+            });               
+        </script>
+</body>
+
+</html>

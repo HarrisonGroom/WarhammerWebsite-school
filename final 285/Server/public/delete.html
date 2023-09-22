@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Leader Deleter</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css"
+        integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
+    <link rel='stylesheet' href='style.css'>
+</head>
+
+<body>
+    <header id="Banner">
+        <h1>Your Form Data</h1>
+    <nav>
+        <ul>
+            <li><a href="FormData.html">Form Data</a></li>
+            <li><a href='index.html'>new response.</a></li>
+          </ul>
+    </nav>
+</header>
+    <section class="container-fluid" id="Wrapper">
+    <p id="leader"></p>
+    <p id="role"></p>
+    <p id="faction_id"></p>
+    <p id="sub_faction"></p>
+
+    <h4>Do you really want to delete this form?</h4>
+    <button id="delete" class="btn btn-danger">Going to the Shadow Realm jimbo</button>
+</section>
+    <p><a id="return" href='update.html'>Actually, I dont want to delete this.</a></p>
+</body>
+<script>
+   
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    console.log(urlParams.get('id'));
+
+    const editId = urlParams.get('id');
+    let valuesSettings = {
+         method: 'GET'
+     }
+    let deleteSettings = {
+        method: 'DELETE',
+    }
+
+    const isEmpty = (obj) => Object.keys(obj).length === 0;
+
+    //for getValues
+    fetch("/factions/" + editId, 
+    valuesSettings)
+        .then((response) => {
+            return new Promise((resolve) => response.json()
+                .then((json) => resolve({
+                    status: response.status,
+                    json,
+                })
+                ));
+        })
+        .then(({ status, json }) => {
+            document.getElementById('leader').innerHTML = "Leader: " + json.data[0].leader;
+            document.getElementById('faction_id').innerHTML = "Faction: " +json.data[0].faction_id;
+            document.getElementById('role').innerHTML = "role: " + json.data[0].role;
+            document.getElementById('sub_faction').innerHTML = "sub faction: " + json.data[0].sub_faction;
+        })
+
+    let deleted = false;
+    document.getElementById('delete').addEventListener('click', (event) => { 
+        if (!deleted) {
+            fetch("/leader/" + editId + "/", deleteSettings)
+                .then((response) => {
+                    return new Promise((resolve) => response.json()
+                        .then((json) => resolve({
+                            status: response.status,
+                            json,
+                        })
+                        ));
+                })
+            deleted = true;
+            document.getElementById('return').innerHTML = "It has been done. Purge Another."
+        }
+    })
+</script>
+
+</html>

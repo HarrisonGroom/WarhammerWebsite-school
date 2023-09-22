@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Leader Updater</title>
+    <link rel='stylesheet' href='style.css'>
+</head>
+
+<body>
+    <header id="Banner">
+        <h1>Survey Responses</h1>
+    <nav>
+        <ul>
+            <li><a href="FormData.html">Form Data</a></li>
+            <li><a href="Informationpage.html">info</a></li>
+            <li><a href='index.html'>new response.</a></li>
+          </ul>
+    </nav>
+</header>
+    <section class="container-fluid" id="Wrapper">
+    <div class="row">
+        <div id="responses" class="col-12"></div>
+    </div>
+
+</section>
+<footer class="container-fluid" id="Footer">
+    <div id="copyright">
+      <p>&copy; Copyright 2022 Harry </p>
+    </div>
+  </footer>
+</body>
+
+<script>
+    const isEmpty = (obj) => Object.keys(obj).length === 0;
+
+    fetch("/leader/",
+        { method: 'Get' })
+        .then((response) => {
+            return new Promise((resolve) => response.json()
+                .then((json) => resolve({
+                    status: response.status,
+                    json,
+                })
+                ));
+        })
+        .then(({ status, json }) => {
+            const responseStuff = document.getElementById('responses');
+            for (response of json.data) {
+                responseStuff.innerHTML += "<p>" + response.leader + ": <a href= 'edit.html?id=" + response.id + "'>Edit <a href='delete.html?id=" + response.id + "'>Delete</p>"
+            }
+
+        })
+
+</script>
+
+</html>
